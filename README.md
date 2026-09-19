@@ -1,2 +1,2 @@
 # Landing-page_ForjaAcademia
-Landing page ficticia de uma Academia.
+Landing page de uma Academia ficticia.
