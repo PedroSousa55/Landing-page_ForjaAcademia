@@ -1,65 +1,67 @@
-// ============================
-// FORJA — interactions
-// ============================
+const cabecalho = document.querySelector(".cabecalho");
+const botaoMenu = document.querySelector(".botao-menu");
+const menu = document.querySelector(".menu");
+const perguntas = document.querySelectorAll(".faq-pergunta");
+const elementosAnimados = document.querySelectorAll(".animar");
+const botoesWhatsApp = document.querySelectorAll(".botao-whatsapp");
 
-document.addEventListener('DOMContentLoaded', () => {
+// Para um cliente real, informe somente os números com DDI + DDD.
+// Exemplo: 5511999999999. Se ficar vazio, o WhatsApp abre com a mensagem pronta.
+const numeroWhatsApp = "";
 
-  /* Mobile menu */
-  const hamburger = document.getElementById('hamburger');
-  const nav = document.getElementById('nav');
+function criarLinkWhatsApp(mensagem) {
+  const texto = encodeURIComponent(mensagem);
+  return numeroWhatsApp
+    ? `https://wa.me/${numeroWhatsApp}?text=${texto}`
+    : `https://wa.me/?text=${texto}`;
+}
 
-  if (hamburger && nav) {
-    hamburger.addEventListener('click', () => {
-      const isOpen = nav.classList.toggle('is-open');
-      hamburger.setAttribute('aria-expanded', String(isOpen));
-      hamburger.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
-    });
+botoesWhatsApp.forEach((botao) => {
+  const mensagem = botao.dataset.mensagem || "Olá! Quero saber mais.";
+  botao.href = criarLinkWhatsApp(mensagem);
+  botao.target = "_blank";
+  botao.rel = "noopener";
+});
 
-    nav.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        nav.classList.remove('is-open');
-        hamburger.setAttribute('aria-expanded', 'false');
-      });
-    });
-  }
+botaoMenu.addEventListener("click", () => {
+  const aberto = menu.classList.toggle("aberto");
+  botaoMenu.setAttribute("aria-expanded", String(aberto));
+});
 
-  /* FAQ accordion */
-  document.querySelectorAll('.aitem').forEach(item => {
-    const btn = item.querySelector('.aitem__q');
-    const answer = item.querySelector('.aitem__a');
+document.querySelectorAll(".menu a").forEach((link) => {
+  link.addEventListener("click", () => {
+    menu.classList.remove("aberto");
+    botaoMenu.setAttribute("aria-expanded", "false");
+  });
+});
 
-    btn.addEventListener('click', () => {
-      const isOpen = btn.getAttribute('aria-expanded') === 'true';
+window.addEventListener("scroll", () => {
+  cabecalho.classList.toggle("rolado", window.scrollY > 24);
+});
 
-      // close all
-      document.querySelectorAll('.aitem__q').forEach(b => {
-        b.setAttribute('aria-expanded', 'false');
-        b.closest('.aitem').querySelector('.aitem__a').style.maxHeight = null;
-      });
+perguntas.forEach((pergunta) => {
+  pergunta.addEventListener("click", () => {
+    const item = pergunta.closest(".faq-item");
+    const resposta = item.querySelector(".faq-resposta");
+    const aberto = item.classList.toggle("aberto");
 
-      if (!isOpen) {
-        btn.setAttribute('aria-expanded', 'true');
-        answer.style.maxHeight = answer.scrollHeight + 'px';
+    pergunta.setAttribute("aria-expanded", String(aberto));
+    resposta.style.maxHeight = aberto ? `${resposta.scrollHeight}px` : "0px";
+  });
+});
+
+const observador = new IntersectionObserver(
+  (entradas, observer) => {
+    entradas.forEach((entrada) => {
+      if (entrada.isIntersecting) {
+        entrada.target.classList.add("visivel");
+        observer.unobserve(entrada.target);
       }
     });
-  });
+  },
+  { threshold: 0.14 },
+);
 
-  /* Scroll reveal */
-  const revealEls = document.querySelectorAll('[data-reveal]');
+elementosAnimados.forEach((elemento) => observador.observe(elemento));
 
-  if ('IntersectionObserver' in window && revealEls.length) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.15 });
-
-    revealEls.forEach(el => observer.observe(el));
-  } else {
-    revealEls.forEach(el => el.classList.add('is-visible'));
-  }
-
-});
+document.getElementById("ano-atual").textContent = new Date().getFullYear();
